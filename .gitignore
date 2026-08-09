@@ -1,0 +1,23 @@
+# Python
+backend/venv/
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.pyc
+
+# Backend environment
+backend/.env
+
+# Frontend dependencies/build
+robertpay-frontend/node_modules/
+robertpay-frontend/dist/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.vscode/
+.DS_Store
+*.swp
