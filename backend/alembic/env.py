@@ -5,9 +5,11 @@ from sqlalchemy import pool
 
 from alembic import context
 from app.database.database import Base
+from app.core.config import settings
 from app.models import *
 from app.transactions.model import Transaction
 from app.payment_requests.model import PaymentRequest
+
 
 target_metadata = Base.metadata
 # this is the Alembic Config object, which provides
@@ -65,10 +67,12 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
+    from sqlalchemy import create_engine
+
+    connectable = create_engine(
+       settings.DATABASE_URL,
+       poolclass=pool.NullPool,
+ 
     )
 
     with connectable.connect() as connection:
