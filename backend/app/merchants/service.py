@@ -1,3 +1,4 @@
+
 from sqlalchemy.orm import Session
 import secrets
 
@@ -16,62 +17,76 @@ def create_merchant(
     merchant: MerchantCreate,
     current_user: User,
 ):
-    existing = (
-        db.query(Merchant)
-        .filter(Merchant.user_id == current_user.id)
-        .first()
-    )
+    try:
+        # Find an existing merchant for this user.
+        existing = (
+            db.query(Merchant)
+            .filter(Merchant.user_id == current_user.id)
+            .first()
+        )
 
-    if existing:
-        return None
+        if existing:
+            new_merchant = existing
+        else:
+            new_merchant = Merchant(
+                business_name=merchant.business_name,
+                business_email=merchant.business_email,
+                business_phone=merchant.business_phone,
+                business_address=merchant.business_address,
+                kra_pin=merchant.kra_pin,
+                user_id=current_user.id,
+            )
+            db.add(new_merchant)
+            db.flush()
 
-    new_merchant = Merchant(
-        business_name=merchant.business_name,
-        business_email=merchant.business_email,
-        business_phone=merchant.business_phone,
-        business_address=merchant.business_address,
-        kra_pin=merchant.kra_pin,
-        user_id=current_user.id,
-    )
+        # Create a wallet only if one does not already exist.
+        wallet = (
+            db.query(Wallet)
+            .filter(Wallet.merchant_id == new_merchant.id)
+            .first()
+        )
 
-    db.add(new_merchant)
-    db.commit()
-    db.refresh(new_merchant)
+        if wallet is None:
+            wallet = Wallet(
+                merchant_id=new_merchant.id,
+                balance=0,
+                currency="KES",
+                status="ACTIVE",
+            )
+            db.add(wallet)
 
-    # Create wallet
-    wallet = Wallet(
-        merchant_id=new_merchant.id,
-        balance=0,
-        currency="KES",
-        status="ACTIVE",
-    )
+        # Create API keys only if they do not already exist.
+        api_key = (
+            db.query(ApiKey)
+            .filter(ApiKey.merchant_id == new_merchant.id)
+            .first()
+        )
 
-    db.add(wallet)
-    db.commit()
-    db.refresh(wallet)
+        if api_key is None:
+            api_key = ApiKey(
+                merchant_id=new_merchant.id,
+                publishable_key="pk_" + secrets.token_hex(16),
+                secret_key="sk_" + secrets.token_hex(32),
+                environment="SANDBOX",
+                status="ACTIVE",
+            )
+            db.add(api_key)
 
-    # Create API keys
-    api_key = ApiKey(
-        merchant_id=new_merchant.id,
-        public_key="pk_" + secrets.token_hex(16),
-        secret_key="sk_" + secrets.token_hex(32),
-        status="ACTIVE",
-    )
+        # Save all missing records together.
+        db.commit()
+        db.refresh(new_merchant)
 
-    db.add(api_key)
-    db.commit()
-    db.refresh(api_key)
+        return new_merchant
 
-    return new_merchant
+    except Exception:
+        db.rollback()
+        raise
 
 
 def get_merchant_profile(
     db: Session,
     current_user: User,
 ):
-    """
-    Return the logged-in user's merchant profile.
-    """
     return (
         db.query(Merchant)
         .filter(Merchant.user_id == current_user.id)
@@ -84,9 +99,6 @@ def update_merchant_profile(
     current_user: User,
     merchant_data: MerchantProfileUpdate,
 ):
-    """
-    Update the logged-in merchant's profile.
-    """
     merchant = (
         db.query(Merchant)
         .filter(Merchant.user_id == current_user.id)
