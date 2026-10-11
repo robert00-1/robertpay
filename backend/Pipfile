@@ -12,10 +12,11 @@ psycopg2-binary = "*"
 pydantic-settings = "*"
 python-jose = "*"
 passlib = "*"
-bcrypt = "*"
+bcrypt = "==4.0.1"
 python-multipart = "*"
 email-validator = "*"
 alembic = "*"
+psycopg = {extras = ["binary"], version = "*"}
 
 [dev-packages]
 

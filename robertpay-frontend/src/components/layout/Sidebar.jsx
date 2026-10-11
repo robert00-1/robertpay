@@ -24,21 +24,9 @@ const menuItems = [
         path: "/payment-requests",
         icon: CreditCard,
     },
-    {
-        name: "Payments",
-        path: "/payments",
-        icon: Receipt,
-    },
-    {
-        name: "Transactions",
-        path: "/transactions",
-        icon: ArrowLeftRight,
-    },
-    {
-        name: "Wallet",
-        path: "/wallet",
-        icon: Wallet,
-    },
+    
+    
+
     {
         name: "Merchant Settings",
         path: "/settings",
