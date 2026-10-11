@@ -60,7 +60,7 @@ class MerchantSettings(Base):
             String(500),
             nullable=True,
       )
-      environment = Column(
+      environment = Column("enviroment",
             String(20),
             default="SANDBOX",
       )
