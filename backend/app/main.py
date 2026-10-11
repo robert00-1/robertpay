@@ -23,6 +23,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "https://robertpay.vercel.app",
+        "https://robertpay-eswk2k8tv-robert00-1s-projects.vercel.app",
+
     ],
     allow_credentials=True,
     allow_methods=["*"],
